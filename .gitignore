@@ -1,6 +1,14 @@
 #config files
 *.ini
 
+#Java class files
+*.class
+
+#Setting for eclipse
+.settings/
+.project
+.classpath
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
