@@ -4,18 +4,15 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
     <meta name="author" content="Ted Li">
 
     <title>TweetMap</title>
 
     <!-- Bootstrap core CSS -->
     <link href="boot/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- Custom styles for this template -->
     <link href="boot/css/custom.css" rel="stylesheet">
     <link href="boot/css/iThing-min.css" rel="stylesheet" />
-
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -41,11 +38,13 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li class="active"><a href="#">Home</a></li>
+                <li id="switch"><a>Turn off light</a></li>
             </ul>
         </div>
         <!--/.nav-collapse -->
     </div>
 </div>
+
 
 <div class="container">
 
@@ -53,8 +52,10 @@
     <div class="jumbotron">
         <h1>TweetMap</h1>
 
-        <p>This crazy application shows the coordinates of Tweets and the heatmap of them. It supports Real Time Mode, in which mode you can see the latest tweets.</p>
-        <a class="btn btn-lg btn-primary" href="https://github.com/wzWang1991/TweetMapServer" role="button">Codes on Github &raquo;</a>
+        <p>This application helps you track the latest tweets of your interests.
+            By default it's pulling data from some <a href="http://aws.amazon.com/rds/" title="RDS">magic place</a> instead of Twitter.
+            You can change to real time mode to see latest tweets.</p>
+        <p><a class="btn btn-primary btn-lg" href="https://github.com/MonkeyLeeT/TweetMap" role="button">Learn more on my GitHub</a></p>
     </div>
 
     <div class="row" id="sliderconainer">
@@ -63,7 +64,7 @@
         </div>
         <div id="rangebuttoncontainer">
             <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#myModal" id="btn-realtime">
-            Clean the map!
+            Enter Real time Mode
             </button>
             <button type="submit" class="btn btn-danger" id="btn-exitrealtime">
             Exit Real Time Mode
@@ -73,14 +74,15 @@
 
     <div class="row">
         <div class="col-md-3">
-            <p>
+            <label for = "sel-keywords">
                 Key word:
-            </p>
-            <select class="form-control" id="sel-keywords">
-                <option>movie</option>
-                <option>soccer</option>
-                <option>party</option>
+            </label>
+
+            <select class="form-control" name="sel-keywords" id="sel-keywords">
+                <option>game</option>
                 <option>food</option>
+                <option>sport</option>
+                <option>yolo</option>
             </select>
             <br/>
 
@@ -98,21 +100,22 @@
             </p>
 
             <div class="well" id="description">Description for each mode.</div>
-        </div>
-        <div class="col-md-9" id="foo">
-        <div id="loading">
-            <div id="spinner"></div>
-            <div id="spinnercover"></div>
-            </div>
-                <div id="map_canvas"></div>
+            <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/search?q=%23food%20OR%20%23game%20OR%20%23music%20OR%20%23sport" data-widget-id="574399363486715905">Real-Time Tweets about #food OR #game OR #music OR #sport</a>
+            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 
+        </div>
+
+        <div class="col-md-9" id="foo">
+            <div id="loading">
+                <div id="spinner"></div>
+                <div id="spinnercover"></div>
+            </div>
+            <div id="map_canvas"></div>
         </div>
     </div>
 
     <footer>
-        <p></p>
-
-        <p>&copy; Cloud Computing and Big Data</p>
+        <p>&copy; Cloud Computing and Big Data 2015 Spring</p>
     </footer>
 </div>
 <!-- /container -->
@@ -126,12 +129,6 @@
                 <h4 class="modal-title" id="myModalLabel">Real Time Mode</h4>
             </div>
             <div class="modal-body">
-                <p>You are entering the Real Time Mode. You can click exit button to exit this mode.</p>
-
-                <p>In this mode, the tweets about "food", "movie", "party" and "soccer" which have coordinates will be
-                    shown on the map. </p>
-
-                <p>The tweets shown in this mode will not be saved in the database.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="btn-enterrealtime">Go!</button>
@@ -140,22 +137,20 @@
     </div>
 </div>
 
-
-<!-- Bootstrap core JavaScript
-================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
-
 <script src="boot/js/jQRangeSlider-min.js"></script>
+<script src="boot/js/jquery.allofthelights-min.js"></script>
 
-<script>
+<script type="text/javascript">
     var time = new Date();
+    
+    
     var timeInSec = time.getTime();
     function unix_to_datetime(unix) {
-        var now = new Date(parseInt(unix) * 1000);
-        var ret = now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate() + " " + toTwoDigit(now.getHours()) + ":" + toTwoDigit(now.getMinutes()) + ":" + toTwoDigit(now.getSeconds());
-        return ret;
+        var now = new Date(parseInt(unix));
+        return now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate() + " " + toTwoDigit(now.getHours()) + ":" + toTwoDigit(now.getMinutes()) + ":" + toTwoDigit(now.getSeconds());
     }
 
     function toTwoDigit(num) {
@@ -165,33 +160,38 @@
     }
 
     $("#slider").rangeSlider({
-        bounds: {min:timeInSec - 86400 , max: timeInSec + 86400},
+        bounds: {min:timeInSec - 432000000 , max: timeInSec + 432000000},
         formatter: function (val) {
             return unix_to_datetime(val);
         },
-        defaultValues: {min:timeInSec - 43200 , max: timeInSec + 43200},
+        defaultValues: {min:timeInSec - 86400000 , max: timeInSec + 86400000},
         step: 1
     });
 </script>
 
 <script src="boot/js/bootstrap.min.js"></script>
-<script type="text/javascript"
-        src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDayRarZl_9rrBq09-O0P1brolBUOLRAoA&sensor=TRUE&libraries=visualization">
-</script>
+<script src="boot/js/markerclusterer.js"></script>
 <script src="http://fgnass.github.io/spin.js/spin.min.js"></script>
+<script type="text/javascript"
+        src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDjTUxLpl-rY6P0XarSBBqWO6rvHXlPRCs&sensor=TRUE&libraries=visualization">
+</script>
+
 <script type="text/javascript">
+    window.google = window.google || {};
+    google.maps = google.maps || {};
     var map, heatmap;
     var markers = [];
     var mapOptions = {
-        center: new google.maps.LatLng(20, 10),
         zoom: 2,
+        center: new google.maps.LatLng(40, 74),
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
     map = new google.maps.Map(document.getElementById("map_canvas"),
             mapOptions);
+
 </script>
 <script>
-
+    var mc = new MarkerClusterer(map);
     var circle = {
         path: google.maps.SymbolPath.CIRCLE,
         fillColor: 'blue',
@@ -232,10 +232,11 @@
             position: location,
             draggable: false,
             animation: google.maps.Animation.DROP,
-            map: map,
+            //map: map,
             title: text
         });
         markers.push(marker);
+        mc.addMarker(marker, false);
         var infowindow = new google.maps.InfoWindow({
             content: text
         });
@@ -263,12 +264,13 @@
     }
 
     function displayHeatMap(msg) {
-        clearMap();
+        //clearMap();
         var tweetPoints = [];
-        for (var i = 0; i < msg.length; i++) {
-            var point = msg[i];
-            var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
-            tweetPoints.push(myLatlng);
+        for (var i = 0; i < markers.length; i++) {
+            //var point = msg[i];
+            //var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
+            //tweetPoints.push(myLatlng);
+            tweetPoints.push(markers[i].getPosition());
         }
         var pointArray = new google.maps.MVCArray(tweetPoints);
         heatmap = new google.maps.visualization.HeatmapLayer({
@@ -284,13 +286,16 @@
             markers[i].setMap(null);
         }
         markers = [];
+        mc.clearMarkers();
     }
 
     function getData(func) {
         var keyword = $('#sel-keywords').val();
-        var min = $("#slider").rangeSlider("min").toString();
-        var max = $("#slider").rangeSlider("max").toString();
-        $.ajax({
+        var slider = $('#slider');
+        var min = slider.rangeSlider("min").toString();
+        var max = slider.rangeSlider("max").toString();
+        func(keyword);
+        /*$.ajax({
             type: "POST",
             url: "getpoints",
             beforeSend: showLoading,
@@ -302,7 +307,7 @@
             error: function () {
                 alert("There is something wrong with the server.");
             }
-        });
+        });*/
     }
 
     function showLoading() {
@@ -315,6 +320,10 @@
     }
 
     $(document).ready(function () {
+        $("#map_canvas").allofthelights();
+        $('#switch').click(function() {
+            $('this').html("Click anywhere outside map to turn on light");
+        });
         $('#btn-scatter').click(function () {
             getData(displayScatter);
             $('#description').html("This is the scatter view of tweets in this period.");
@@ -340,14 +349,14 @@
     	connectToServer();
         $('#btn-enterrealtime').click(function () {
             clearMap();
-            //$('#sel-keywords').prop('disabled', true);
-            //$('.btn-modes').prop('disabled', true);
-            //$('#slider').rangeSlider("disable");
+            $('#sel-keywords').prop('disabled', true);
+            $('.btn-modes').prop('disabled', true);
+            $('#slider').rangeSlider("disable");
             $('#myModal').modal('hide');
-            //$('#btn-realtime').hide();
-            //$('#btn-exitrealtime').show();
-            //connectToServer();
-            //$('#description').html("Now you are in Real Time Mode. You can click the markers to see the content of tweet.");
+            $('#btn-realtime').hide();
+            $('#btn-exitrealtime').show();
+            connectToServer();
+            $('#description').html("Now you are in Real Time Mode. You can click the markers to see the content of tweet.");
         });
         $('#btn-exitrealtime').click(function () {
             clearMap();
@@ -356,6 +365,7 @@
             $('#slider').rangeSlider("enable");
             $('#btn-realtime').show();
             $('#btn-exitrealtime').hide();
+            $('#description').html("Description for each mode.");
             webSocket.close();
             webSocket = null;
 
@@ -373,6 +383,7 @@
             };
             webSocket.onerror = function (evt) {
                 webSocket = null;
+                console.log(evt);
             }
         }
     }
@@ -383,7 +394,6 @@
         var msg = JSON.parse(evt.data);
         var myLatlng = new google.maps.LatLng(msg['coordinates']['coordinates'][1], msg['coordinates']['coordinates'][0]);
         addRealTimeTweetMarker(myLatlng, msg['text']);
-
     }
 
     $(document).ready(function () {

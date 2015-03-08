@@ -42,7 +42,7 @@ public class Rds {
         try {
             Class.forName(JDBC_DRIVER);
             System.out.println("Connecting to database...");
-            conn = DriverManager.getConnection(DB_URL, "xiaojing", password);
+            conn = DriverManager.getConnection(DB_URL, "FallMonkey", password);
         } catch (Exception e) {
         	e.printStackTrace();
         }

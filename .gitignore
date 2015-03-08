@@ -1,13 +1,18 @@
-#config files
+#confidential files
 *.ini
 
 #Java class files
+build/
 *.class
 
-#Setting for eclipse
+#Files for eclipse
 .settings/
 .project
 .classpath
+
+#Files for IDEA
+.idea/
+*.iml
 
 # Windows image file caches
 Thumbs.db

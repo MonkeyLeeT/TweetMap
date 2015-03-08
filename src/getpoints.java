@@ -56,6 +56,7 @@ public class getpoints extends HttpServlet {
         out.flush();
 	}
 	
+	@SuppressWarnings("resource")
 	private String readPass() throws IOException {
 		InputStream password = Thread.currentThread().getContextClassLoader().getResourceAsStream("pass.ini");
         String pass = null;
