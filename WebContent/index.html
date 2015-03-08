@@ -38,7 +38,6 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li class="active"><a href="#">Home</a></li>
-                <li id="switch"><a>Turn off light</a></li>
             </ul>
         </div>
         <!--/.nav-collapse -->
@@ -54,13 +53,13 @@
 
         <p>This application helps you track the latest tweets of your interests.
             By default it's pulling data from some <a href="http://aws.amazon.com/rds/" title="RDS">magic place</a> instead of Twitter.
-            You can change to real time mode to see latest tweets.</p>
+            You can change to real time mode to see latest tweets poping up.</p>
         <p><a class="btn btn-primary btn-lg" href="https://github.com/MonkeyLeeT/TweetMap" role="button">Learn more on my GitHub</a></p>
     </div>
 
     <div class="row" id="sliderconainer">
-        <div class="col-md-10">Pick a time range:
-            <div id="slider"></div>
+        <div class="col-md-10">
+            <div id="slider" title="Choose the desire time range."></div>
         </div>
         <div id="rangebuttoncontainer">
             <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#myModal" id="btn-realtime">
@@ -77,31 +76,26 @@
             <label for = "sel-keywords">
                 Key word:
             </label>
-
             <select class="form-control" name="sel-keywords" id="sel-keywords">
-                <option>game</option>
                 <option>food</option>
+                <option>game</option>
+                <option>music</option>
                 <option>sport</option>
-                <option>yolo</option>
             </select>
             <br/>
 
             <p>
-                Choose a mode:
+                <b>Mode switch:</b>:
             </p>
 
-            <button type="button" class="btn btn-default btn-modes" id="btn-scatter">Scatter</button>
-            <button type="button" class="btn btn-default btn-modes" id="btn-tweets">Tweets</button>
-            <button type="button" class="btn btn-default btn-modes" id="btn-heatmap">HeatMap</button>
-
-            <p>
-                <br/>
-                Description:
-            </p>
-
-            <div class="well" id="description">Description for each mode.</div>
+            <button type="button" class="btn btn-default btn-modes" id="btn-scatter" title="This is the scatter view of tweets in this period.">
+                <span class="glyphicon glyphicon-dashboard" aria-hidden="true"></span>Scatter</button>
+            <button type="button" class="btn btn-default btn-modes" id="btn-heatmap" title="This is the heat map of tweets in this period.">
+                <span class="glyphicon glyphicon-tint" aria-hidden="true"></span>Heatmap</button>
+            <button type="button" class="btn btn-default btn-modes" id="switch" title="Turn off ligt. Click anywhere to resume.">
+                <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>Light</button>
+            <p></p>
             <a class="twitter-timeline" data-dnt="true" href="https://twitter.com/search?q=%23food%20OR%20%23game%20OR%20%23music%20OR%20%23sport" data-widget-id="574399363486715905">Real-Time Tweets about #food OR #game OR #music OR #sport</a>
-            <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 
         </div>
 
@@ -115,6 +109,7 @@
     </div>
 
     <footer>
+        <br>
         <p>&copy; Cloud Computing and Big Data 2015 Spring</p>
     </footer>
 </div>
@@ -129,6 +124,8 @@
                 <h4 class="modal-title" id="myModalLabel">Real Time Mode</h4>
             </div>
             <div class="modal-body">
+                <p>Real time tweets about all keywords will be shown in this mode.</p>
+                <p>These tweets will be saved in  <a href="http://aws.amazon.com/rds/" title="RDS">magic place</a> for filtering.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="btn-enterrealtime">Go!</button>
@@ -147,9 +144,9 @@
     var time = new Date();
     
     
-    var timeInSec = time.getTime();
+    var timeInSec = time.getTime() / 1000;
     function unix_to_datetime(unix) {
-        var now = new Date(parseInt(unix));
+        var now = new Date(parseInt(unix) * 1000);
         return now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate() + " " + toTwoDigit(now.getHours()) + ":" + toTwoDigit(now.getMinutes()) + ":" + toTwoDigit(now.getSeconds());
     }
 
@@ -160,11 +157,11 @@
     }
 
     $("#slider").rangeSlider({
-        bounds: {min:timeInSec - 432000000 , max: timeInSec + 432000000},
+        bounds: {min:timeInSec - 432000 , max: timeInSec + 432000},
         formatter: function (val) {
             return unix_to_datetime(val);
         },
-        defaultValues: {min:timeInSec - 86400000 , max: timeInSec + 86400000},
+        defaultValues: {min:timeInSec - 86400 , max: timeInSec + 86400},
         step: 1
     });
 </script>
@@ -183,7 +180,7 @@
     var markers = [];
     var mapOptions = {
         zoom: 2,
-        center: new google.maps.LatLng(40, 74),
+        center: new google.maps.LatLng(0, 0),
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
     map = new google.maps.Map(document.getElementById("map_canvas"),
@@ -192,56 +189,26 @@
 </script>
 <script>
     var mc = new MarkerClusterer(map);
-    var circle = {
-        path: google.maps.SymbolPath.CIRCLE,
-        fillColor: 'blue',
-        fillOpacity: 1,
-        scale: 1,
-        strokeColor: 'blue',
-        strokeWeight: 1
-    };
 
-    function addMarker(location) {
+    function addMarker(location, id_str) {
         var marker = new google.maps.Marker({
             position: location,
-            icon: circle,
-            draggable: false,
-            map: map
-        });
-        markers.push(marker);
-    }
-
-    function addTweetMarker(location, text) {
-        var marker = new google.maps.Marker({
-            position: location,
-            draggable: false,
             map: map,
-            title: text
+            draggable: false
         });
-        markers.push(marker);
-        var infowindow = new google.maps.InfoWindow({
-            content: text
-        });
-        google.maps.event.addListener(marker, 'click', function () {
-            infowindow.open(map, marker);
-        });
-    }
-
-    function addRealTimeTweetMarker(location, text) {
-        var marker = new google.maps.Marker({
-            position: location,
-            draggable: false,
-            animation: google.maps.Animation.DROP,
-            //map: map,
-            title: text
-        });
-        markers.push(marker);
         mc.addMarker(marker, false);
+        markers.push(marker);
+        var twt = '<div id="tweetcontainer' + id_str + '"></div>';
         var infowindow = new google.maps.InfoWindow({
-            content: text
+            content: twt
         });
         google.maps.event.addListener(marker, 'click', function () {
             infowindow.open(map, marker);
+            twttr.widgets.createTweet(
+                    id_str,
+                    document.getElementById('tweetcontainer' + id_str),
+                    {width: 500}
+            );
         });
     }
 
@@ -249,27 +216,15 @@
         clearMap();
         for (var i = 0; i < msg.length; i++) {
             var point = msg[i];
-            var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
-            addMarker(myLatlng);
+            var myLatlng = new google.maps.LatLng(point['latitude'], point['longitude']);
+            addMarker(myLatlng, point['id_str']);
         }
     }
 
-    function displayTweet(msg) {
+    function displayHeatMap() {
         clearMap();
-        for (var i = 0; i < msg.length; i++) {
-            var point = msg[i];
-            var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
-            addTweetMarker(myLatlng, point['text']);
-        }
-    }
-
-    function displayHeatMap(msg) {
-        //clearMap();
         var tweetPoints = [];
         for (var i = 0; i < markers.length; i++) {
-            //var point = msg[i];
-            //var myLatlng = new google.maps.LatLng(point['coor2'], point['coor1']);
-            //tweetPoints.push(myLatlng);
             tweetPoints.push(markers[i].getPosition());
         }
         var pointArray = new google.maps.MVCArray(tweetPoints);
@@ -295,7 +250,7 @@
         var min = slider.rangeSlider("min").toString();
         var max = slider.rangeSlider("max").toString();
         func(keyword);
-        /*$.ajax({
+        $.ajax({
             type: "POST",
             url: "getpoints",
             beforeSend: showLoading,
@@ -307,7 +262,7 @@
             error: function () {
                 alert("There is something wrong with the server.");
             }
-        });*/
+        });
     }
 
     function showLoading() {
@@ -321,23 +276,12 @@
 
     $(document).ready(function () {
         $("#map_canvas").allofthelights();
-        $('#switch').click(function() {
-            $('this').html("Click anywhere outside map to turn on light");
-        });
         $('#btn-scatter').click(function () {
             getData(displayScatter);
-            $('#description').html("This is the scatter view of tweets in this period.");
-        });
-
-        $('#btn-tweets').click(function () {
-            getData(displayTweet);
-            $('#description').html("You can click the markers to see the detail tweet.");
-
         });
 
         $('#btn-heatmap').click(function () {
             getData(displayHeatMap);
-            $('#description').html("This is the heat map of tweets in this period.");
         });
 
     });
@@ -346,7 +290,6 @@
     var webSocket = null;
     var realTimeMode = false;
     $(document).ready(function () {
-    	connectToServer();
         $('#btn-enterrealtime').click(function () {
             clearMap();
             $('#sel-keywords').prop('disabled', true);
@@ -368,7 +311,6 @@
             $('#description').html("Description for each mode.");
             webSocket.close();
             webSocket = null;
-
         });
     });
     function connectToServer() {
@@ -393,7 +335,7 @@
     function onMessage(evt) {
         var msg = JSON.parse(evt.data);
         var myLatlng = new google.maps.LatLng(msg['coordinates']['coordinates'][1], msg['coordinates']['coordinates'][0]);
-        addRealTimeTweetMarker(myLatlng, msg['text']);
+        addMarker(myLatlng, msg['id_str']);
     }
 
     $(document).ready(function () {
@@ -420,6 +362,24 @@
     });
 
 
+</script>
+<script>
+    window.twttr = (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0],
+            t = window.twttr || {};
+    if (d.getElementById(id)) return;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = "https://platform.twitter.com/widgets.js";
+    fjs.parentNode.insertBefore(js, fjs);
+
+    t._e = [];
+    t.ready = function(f) {
+        t._e.push(f);
+    };
+
+    return t;
+}(document, "script", "twitter-wjs"));
 </script>
 </body>
 </html>

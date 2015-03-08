@@ -5,10 +5,8 @@ public class Tweet {
     public String created_at;
     public String text;
     public Coordinate coordinates;
-
-
-
-    public static class Coordinate {
+    
+    public class Coordinate {
         String type;
         List<Double> coordinates;
 
@@ -16,7 +14,7 @@ public class Tweet {
             return coordinates.toString();
         }
     }
-
+    
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("id_str: " + id_str + "\n");

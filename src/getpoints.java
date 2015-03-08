@@ -22,14 +22,12 @@ public class getpoints extends HttpServlet {
      */
     public getpoints() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
 	}
 
 	/**
@@ -48,7 +46,6 @@ public class getpoints extends HttpServlet {
 		try {
 			list = rds.select(keyword, startTime, endTime);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Gson gson = new Gson();
@@ -56,9 +53,10 @@ public class getpoints extends HttpServlet {
         out.flush();
 	}
 	
+
 	@SuppressWarnings("resource")
-	private String readPass() throws IOException {
-		InputStream password = Thread.currentThread().getContextClassLoader().getResourceAsStream("pass.ini");
+	private String readPass() {
+		InputStream password = Thread.currentThread().getContextClassLoader().getResourceAsStream("credentials.ini");
         String pass = null;
         pass = new Scanner(password).next();
         return pass;
