@@ -1,6 +1,6 @@
 #confidential files
 *.ini
-*.properties
+*.PROPERTIES
 
 #Java class files
 build/
@@ -58,3 +58,4 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.properties
