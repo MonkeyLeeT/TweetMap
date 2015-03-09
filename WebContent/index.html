@@ -142,8 +142,6 @@
 
 <script type="text/javascript">
     var time = new Date();
-    
-    
     var timeInSec = time.getTime() / 1000;
     function unix_to_datetime(unix) {
         var now = new Date(parseInt(unix) * 1000);
@@ -157,11 +155,11 @@
     }
 
     $("#slider").rangeSlider({
-        bounds: {min:timeInSec - 432000 , max: timeInSec + 432000},
+        bounds: {min:timeInSec - 216000 , max: timeInSec + 216000},
         formatter: function (val) {
             return unix_to_datetime(val);
         },
-        defaultValues: {min:timeInSec - 86400 , max: timeInSec + 86400},
+        defaultValues: {min:timeInSec - 43200 , max: timeInSec + 43200},
         step: 1
     });
 </script>
@@ -190,13 +188,21 @@
 <script>
     var mc = new MarkerClusterer(map);
 
-    function addMarker(location, id_str) {
+    function addMarker(location, id_str, type) {
+        var anime;
+        if (type == "real")
+            anime = google.maps.Animation.DROP;
+        else
+            anime = '';
         var marker = new google.maps.Marker({
             position: location,
+            animation: anime,
             map: map,
             draggable: false
         });
-        mc.addMarker(marker, false);
+        setTimeout(function () {
+            mc.addMarker(marker);
+        }, 750);
         markers.push(marker);
         var twt = '<div id="tweetcontainer' + id_str + '"></div>';
         var infowindow = new google.maps.InfoWindow({
@@ -204,6 +210,9 @@
         });
         google.maps.event.addListener(marker, 'click', function () {
             infowindow.open(map, marker);
+            if ($('#tweetcontainer' + id_str + ' iframe').width() > 1) {
+                return;
+            }
             twttr.widgets.createTweet(
                     id_str,
                     document.getElementById('tweetcontainer' + id_str),
@@ -221,11 +230,13 @@
         }
     }
 
-    function displayHeatMap() {
+    function displayHeatMap(msg) {
         clearMap();
         var tweetPoints = [];
-        for (var i = 0; i < markers.length; i++) {
-            tweetPoints.push(markers[i].getPosition());
+        for (var i = 0; i < msg.length; i++) {
+            var point = msg[i];
+            var myLatlng = new google.maps.LatLng(point['latitude'], point['longitude']);
+            tweetPoints.push(myLatlng);
         }
         var pointArray = new google.maps.MVCArray(tweetPoints);
         heatmap = new google.maps.visualization.HeatmapLayer({
@@ -244,17 +255,17 @@
         mc.clearMarkers();
     }
 
+    var time = new Date();
     function getData(func) {
         var keyword = $('#sel-keywords').val();
         var slider = $('#slider');
-        var min = slider.rangeSlider("min").toString();
-        var max = slider.rangeSlider("max").toString();
-        func(keyword);
+        var min = slider.rangeSlider("min") + time.getTimezoneOffset() * 60;
+        var max = slider.rangeSlider("max") + time.getTimezoneOffset() * 60;
         $.ajax({
             type: "POST",
             url: "getpoints",
             beforeSend: showLoading,
-            data: {"keyword": keyword, "start": min.concat("000"), "end": max.concat("000")},
+            data: {"keyword": keyword, "start": min.toString().concat("000"), "end": max.toString().concat("000")},
             success: function (msg) {
                 hideLoading();
                 func(msg);
@@ -293,7 +304,8 @@
         $('#btn-enterrealtime').click(function () {
             clearMap();
             $('#sel-keywords').prop('disabled', true);
-            $('.btn-modes').prop('disabled', true);
+            $('#btn-scatter').prop('disabled', true);
+            $('#btn-heatmap').prop('disabled', true);
             $('#slider').rangeSlider("disable");
             $('#myModal').modal('hide');
             $('#btn-realtime').hide();
@@ -308,14 +320,13 @@
             $('#slider').rangeSlider("enable");
             $('#btn-realtime').show();
             $('#btn-exitrealtime').hide();
-            $('#description').html("Description for each mode.");
             webSocket.close();
             webSocket = null;
         });
     });
     function connectToServer() {
         if (webSocket == null) {
-            var wsServer = 'ws://72.227.141.87:11111';
+            var wsServer = 'ws://ec2-54-152-153-240.compute-1.amazonaws.com:11111';
             webSocket = new WebSocket(wsServer);
             webSocket.onopen = function () {
                 onOpen();
@@ -335,7 +346,7 @@
     function onMessage(evt) {
         var msg = JSON.parse(evt.data);
         var myLatlng = new google.maps.LatLng(msg['coordinates']['coordinates'][1], msg['coordinates']['coordinates'][0]);
-        addMarker(myLatlng, msg['id_str']);
+        addMarker(myLatlng, msg['id_str'], "real");
     }
 
     $(document).ready(function () {
@@ -377,7 +388,6 @@
     t.ready = function(f) {
         t._e.push(f);
     };
-
     return t;
 }(document, "script", "twitter-wjs"));
 </script>
