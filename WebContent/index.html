@@ -54,7 +54,7 @@
         <p>This application helps you track the latest tweets of your interests.
             By default it's pulling data from some <a href="http://aws.amazon.com/rds/" title="RDS">magic place</a> instead of Twitter.
             You can change to real time mode to see latest tweets poping up.</p>
-        <p><a class="btn btn-primary btn-lg" href="https://github.com/MonkeyLeeT/TweetMap" role="button">Learn more on my GitHub</a></p>
+        <p><a class="btn btn-info btn-lg" href="https://github.com/MonkeyLeeT/TweetMap" role="button">Learn more on my GitHub</a></p>
     </div>
 
     <div class="row" id="sliderconainer">
@@ -135,8 +135,8 @@
 </div>
 
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+<script src="boot/js/jquery.min.js"></script>
+<script src="boot/js/jquery-ui.min.js"></script>
 <script src="boot/js/jQRangeSlider-min.js"></script>
 <script src="boot/js/jquery.allofthelights-min.js"></script>
 
@@ -186,7 +186,8 @@
 
 </script>
 <script>
-    var mc = new MarkerClusterer(map);
+    var mcOptions = {gridSize: 60};
+    var mc = new MarkerClusterer(map, [], mcOptions);
 
     function addMarker(location, id_str, type) {
         var anime;
@@ -211,7 +212,7 @@
         google.maps.event.addListener(marker, 'click', function () {
             infowindow.open(map, marker);
             if ($('#tweetcontainer' + id_str + ' iframe').width() > 1) {
-                return;
+                $('#tweetcontainer' + id_str + ' iframe').remove();
             }
             twttr.widgets.createTweet(
                     id_str,
@@ -381,7 +382,7 @@
     if (d.getElementById(id)) return;
     js = d.createElement(s);
     js.id = id;
-    js.src = "https://platform.twitter.com/widgets.js";
+    js.src = "boot/js/widgets.js";
     fjs.parentNode.insertBefore(js, fjs);
 
     t._e = [];
