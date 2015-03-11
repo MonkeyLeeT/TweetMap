@@ -43,10 +43,11 @@ public class Rds {
     
     public void init() {
         try {
+        	System.out.println("Init called");
             Class.forName(JDBC_DRIVER);
             conn = DriverManager.getConnection(DB_URL, "FallMonkey", password);
         } catch (Exception e) {
-        	e.printStackTrace();
+        	e.printStackTrace(System.out);
         }
     }
 
@@ -73,7 +74,6 @@ public class Rds {
                 }
                 rs.close();
                 stmt.close();
-                conn.close();
                 break;
             } catch (Exception e) {
             	System.out.println("Reconnect to database in 3 seconds.");
@@ -114,7 +114,6 @@ public class Rds {
         			}
         		}
         		stmt.close();
-                conn.close();
         		break;
 			} catch (Exception e) {
 				System.out.println("Reconnect to database in 3 seconds.");
